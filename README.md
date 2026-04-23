@@ -46,7 +46,9 @@ west flash
 
 ## Serial output
 
-Connect to **VCOM1** (typically COM81 on Windows — the second JLink CDC UART port) at **115200 baud**.
+Connect to **VCOM1** (the second JLink CDC UART port) at **115200 baud**.
+
+> **Note:** COM port numbers are assigned by Windows and vary from computer to computer. On the development machine used for this example the ports appeared as COM80 and COM81, but yours will likely be different. Open *Device Manager → Ports (COM & LPT)* and look for two entries named **JLink CDC UART Port** — VCOM1 is the one with the higher COM number.
 
 Expected output after reset:
 
@@ -160,10 +162,12 @@ The nRF54L15 DK exposes two JLink CDC UART ports:
 
 | Port | Maps to | Use |
 |---|---|---|
-| VCOM0 (COM80) | UART30 | Secondary / unused |
-| VCOM1 (COM81) | UART20 | Application console (this example) |
+| VCOM0 | UART30 | Secondary / unused |
+| VCOM1 | UART20 | Application console (this example) |
 
 On the nRF54L15 DK the application UART (`uart20`) maps to **VCOM1**, which is the **second** JLink CDC port. This is the opposite convention from some other Nordic DKs.
+
+The actual COM port numbers (e.g. COM80/COM81 on the development machine used here) are assigned by Windows and **will differ on every computer**. To find the correct ports, open *Device Manager → Ports (COM & LPT)* and identify the two **JLink CDC UART Port** entries while the DK is connected.
 
 If no output appears on COM80, try COM81. The assignment can vary between host systems.
 

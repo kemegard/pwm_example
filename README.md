@@ -36,10 +36,6 @@ On nRF54L15, the PWM peripherals (PWM20/21/22) share a power domain exclusively 
 ## Building and flashing
 
 ```bash
-# Set ZEPHYR_BASE if not already in your environment
-export ZEPHYR_BASE=/path/to/ncs/v3.3.0-rc2/zephyr   # Linux/macOS
-$env:ZEPHYR_BASE = "D:\work\ncs\v3.3.0-rc2\zephyr"   # Windows PowerShell
-
 west build -b nrf54l15dk/nrf54l15/cpuapp --pristine
 west flash
 ```

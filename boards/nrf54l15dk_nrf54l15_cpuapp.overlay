@@ -1,0 +1,79 @@
+/*
+ * boards/nrf54l15dk_nrf54l15_cpuapp.overlay
+ *
+ * Explicit PWM configuration for the nRF54L15 DK.
+ *
+ * This overlay deliberately re-configures what the board's built-in DTS already
+ * provides so that the full hardware setup chain is visible in one place:
+ *
+ *   Application (alias: pwm-led0)
+ *     └─ DT node: pwm_led_0 (compatible "pwm-leds")
+ *         └─ pwm20, channel 0, period 20 ms (50 Hz)
+ *             └─ pinctrl: PWM_OUT0 → P1.10  (LED1 on the DK)
+ *
+ * Why P1.10?
+ *   On nRF54L15 the PWM20/21/22 peripherals share the same power domain as
+ *   GPIO Port P1.  The PWM subsystem can only drive GPIO pins that are in the
+ *   same domain, so only Port P1 pins can carry a hardware PWM signal.
+ *   LED1 (P1.10) is the only on-board LED wired to Port P1.
+ *   SW-PWM (nordic,nrf-sw-pwm) is not supported on the nRF54L-series.
+ */
+
+&pinctrl {
+	/*
+	 * Custom pinctrl state: route PWM20 output 0 to P1.10 (LED1).
+	 * Named "custom" to distinguish it from the board default and to
+	 * make the assignment explicit in this application's source tree.
+	 */
+	pwm20_default_custom: pwm20_default_custom {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT0, 1, 10)>;
+		};
+	};
+
+	pwm20_sleep_custom: pwm20_sleep_custom {
+		group1 {
+			psels = <NRF_PSEL(PWM_OUT0, 1, 10)>;
+			low-power-enable;
+		};
+	};
+};
+
+/*
+ * Override the PWM20 peripheral node to use the pin states defined above.
+ * This replaces the board-default "pwm20_default" / "pwm20_sleep" states.
+ */
+&pwm20 {
+	status = "okay";
+	pinctrl-0 = <&pwm20_default_custom>;
+	pinctrl-1 = <&pwm20_sleep_custom>;
+	pinctrl-names = "default", "sleep";
+};
+
+/*
+ * Add a "pwm-leds" node so the Zephyr PWM-LED API can locate the device.
+ * The alias "pwm-led0" is consumed by the application via DT_ALIAS(pwm_led0).
+ *
+ * The board common DTS already defines a pwm_led1 node and the pwm-led0 alias
+ * pointing to it.  The node defined here (pwm_led0_inst) is functionally
+ * equivalent but lives inside this overlay so the intent is self-documenting.
+ * Zephyr's DTS merge will keep both nodes; the alias is overridden here.
+ */
+/ {
+	pwm_led_node: pwm_leds_custom {
+		compatible = "pwm-leds";
+		status = "okay";
+
+		pwm_led0_inst: pwm_led_0 {
+			/*
+			 * <controller  channel  period  flags>
+			 *  &pwm20       0        20 ms   normal polarity
+			 */
+			pwms = <&pwm20 0 PWM_MSEC(20) PWM_POLARITY_NORMAL>;
+		};
+	};
+
+	aliases {
+		pwm-led0 = &pwm_led0_inst;
+	};
+};

@@ -1,0 +1,14 @@
+# Zephyr / west build artifacts
+build/
+twister-out*/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Editor / OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
